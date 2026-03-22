@@ -1,49 +1,102 @@
-#include <WiFi.h>
-#include <WebServer.h>
-#include <DNSServer.h>
-
-const char* ssid = "Free_WiFi";
-const byte DNS_PORT = 53;
-
-DNSServer dnsServer;
-WebServer server(80);
-
-// Your HTML page
-String htmlPage = R"rawliteral(
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Welcome</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Portal</title>
+
+<style>
+  body {
+    margin: 0;
+    overflow: hidden;
+    background: black;
+    font-family: Arial, sans-serif;
+    color: white;
+  }
+
+  canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+  }
+
+  .center-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+
+  .main {
+    font-size: 40px;
+    font-weight: bold;
+  }
+
+  .sub {
+    font-size: 20px;
+    color: #bb86fc;
+    margin-top: 10px;
+  }
+</style>
 </head>
-<body style="text-align:center; font-family:sans-serif;">
-  <h1>Welcome to My Network</h1>
-  <p>This is a custom message portal 😎</p>
+
+<body>
+
+<canvas id="bg"></canvas>
+
+<div class="center-text">
+  <div class="main">Welcome to the Void 😈</div>
+  <div class="sub">Pwned by Izzy</div>
+</div>
+
+<script>
+const canvas = document.getElementById("bg");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let stars = [];
+
+for (let i = 0; i < 120; i++) {
+  stars.push({
+    x: Math.random() * canvas.width,
+    y: Math.random() * canvas.height,
+    r: Math.random() * 2,
+    d: Math.random() * 1
+  });
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  ctx.fillStyle = "#bb86fc"; // purple
+  ctx.beginPath();
+
+  for (let i = 0; i < stars.length; i++) {
+    let s = stars[i];
+    ctx.moveTo(s.x, s.y);
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2, true);
+  }
+
+  ctx.fill();
+  update();
+}
+
+function update() {
+  for (let i = 0; i < stars.length; i++) {
+    let s = stars[i];
+    s.y += s.d;
+
+    if (s.y > canvas.height) {
+      s.y = 0;
+      s.x = Math.random() * canvas.width;
+    }
+  }
+}
+
+setInterval(draw, 33);
+</script>
+
 </body>
 </html>
-)rawliteral";
-
-void handleRoot() {
-  server.send(200, "text/html", htmlPage);
-}
-
-void setup() {
-  Serial.begin(115200);
-
-  WiFi.softAP(ssid);
-  delay(1000);
-
-  // Redirect all DNS requests to ESP IP
-  dnsServer.start(DNS_PORT, "*", WiFi.softAPIP());
-
-  // Web server routes
-  server.on("/", handleRoot);
-  server.onNotFound(handleRoot);
-
-  server.begin();
-}
-
-void loop() {
-  dnsServer.processNextRequest();
-  server.handleClient();
-}
