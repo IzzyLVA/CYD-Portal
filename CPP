@@ -2,53 +2,88 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Network Portal</title>
+<meta http-equiv="Cache-Control" content="no-store" />
+<title>Portal</title>
 
 <style>
-body {
+html, body {
   margin: 0;
-  background: black;
-  overflow: hidden;
-  font-family: monospace;
+  padding: 0;
+  background: black !important;
   color: #bb86fc;
+  font-family: monospace;
+  overflow: hidden;
 }
 
-/* Canvas background */
-canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-}
-
-/* Scanline effect */
-.scanlines {
+/* Moving background (CSS only) */
+.bg {
   position: fixed;
-  width: 100%;
-  height: 100%;
-  background: repeating-linear-gradient(
-    to bottom,
-    rgba(255,255,255,0.03) 0px,
-    rgba(255,255,255,0.03) 1px,
-    transparent 2px,
-    transparent 4px
-  );
-  pointer-events: none;
+  width: 200%;
+  height: 200%;
+  background-image: radial-gradient(#bb86fc 1px, transparent 1px);
+  background-size: 40px 40px;
+  opacity: 0.15;
+  animation: moveBg 60s linear infinite;
 }
 
-/* Center content */
+@keyframes moveBg {
+  from { transform: translate(0,0); }
+  to { transform: translate(-50%, -50%); }
+}
+
+/* Center */
 .center {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+/* Loading screen */
+#loading {
   text-align: center;
+  animation: fadeOut 1s ease forwards;
+  animation-delay: 2.5s;
+}
+
+@keyframes fadeOut {
+  to { opacity: 0; visibility: hidden; }
+}
+
+/* Typing effect */
+.type {
+  font-size: 18px;
+  white-space: nowrap;
+  overflow: hidden;
+  border-right: 2px solid #bb86fc;
+  width: 0;
+  animation: typing 2s steps(30, end) forwards, blink 0.7s infinite;
+}
+
+@keyframes typing {
+  to { width: 100%; }
+}
+
+@keyframes blink {
+  50% { border-color: transparent; }
+}
+
+/* Main content */
+#main {
+  text-align: center;
+  opacity: 0;
+  animation: fadeIn 2s ease forwards;
+  animation-delay: 2.7s;
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
 }
 
 /* Glitch text */
 .glitch {
-  font-size: 42px;
+  font-size: 40px;
   position: relative;
-  animation: glitch 1s infinite;
 }
 
 .glitch::before,
@@ -60,134 +95,51 @@ canvas {
 
 .glitch::before {
   color: #ff00ff;
-  z-index: -1;
   animation: glitchTop 1s infinite;
 }
 
 .glitch::after {
   color: #00ffff;
-  z-index: -2;
   animation: glitchBottom 1s infinite;
 }
 
-@keyframes glitch {
-  0% { transform: translate(0); }
-  20% { transform: translate(-2px, 2px); }
-  40% { transform: translate(-2px, -2px); }
-  60% { transform: translate(2px, 2px); }
-  80% { transform: translate(2px, -2px); }
-  100% { transform: translate(0); }
-}
-
 @keyframes glitchTop {
-  0% { transform: translate(0); }
-  50% { transform: translate(-3px, -3px); }
-  100% { transform: translate(0); }
+  50% { transform: translate(-2px, -2px); }
 }
 
 @keyframes glitchBottom {
-  0% { transform: translate(0); }
-  50% { transform: translate(3px, 3px); }
-  100% { transform: translate(0); }
+  50% { transform: translate(2px, 2px); }
 }
 
 /* Sub text */
 .sub {
-  margin-top: 15px;
+  margin-top: 10px;
   font-size: 18px;
   color: #8a2be2;
   animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
-  0% { opacity: 0.4; }
-  50% { opacity: 1; }
-  100% { opacity: 0.4; }
+  50% { opacity: 0.5; }
 }
 
-/* Loading screen */
-#loading {
-  color: #bb86fc;
-  font-size: 20px;
-}
-
-.hidden {
-  display: none;
-}
 </style>
 </head>
 
 <body>
 
-<canvas id="bg"></canvas>
-<div class="scanlines"></div>
+<div class="bg"></div>
 
+<!-- Loading -->
 <div class="center" id="loading">
-  <div>> establishing connection...</div>
+  <div class="type">> establishing connection...</div>
 </div>
 
-<div class="center hidden" id="main">
+<!-- Main -->
+<div class="center" id="main">
   <div class="glitch" data-text="ACCESS GRANTED">ACCESS GRANTED</div>
   <div class="sub">Pwned by Izzy</div>
 </div>
-
-<script>
-// ===== STARFIELD =====
-const canvas = document.getElementById("bg");
-const ctx = canvas.getContext("2d");
-
-canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
-
-let stars = [];
-
-for (let i = 0; i < 150; i++) {
-  stars.push({
-    x: Math.random() * canvas.width,
-    y: Math.random() * canvas.height,
-    z: Math.random() * canvas.width
-  });
-}
-
-function drawStars() {
-  ctx.fillStyle = "black";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  ctx.fillStyle = "#bb86fc";
-
-  for (let i = 0; i < stars.length; i++) {
-    let s = stars[i];
-
-    let k = 128.0 / s.z;
-    let px = s.x * k + canvas.width / 2;
-    let py = s.y * k + canvas.height / 2;
-
-    if (px >= 0 && px <= canvas.width && py >= 0 && py <= canvas.height) {
-      let size = (1 - s.z / canvas.width) * 3;
-      ctx.fillRect(px, py, size, size);
-    }
-
-    s.z -= 2;
-
-    if (s.z <= 0) {
-      s.z = canvas.width;
-    }
-  }
-}
-
-function animate() {
-  drawStars();
-  requestAnimationFrame(animate);
-}
-
-animate();
-
-// ===== FAKE LOADING =====
-setTimeout(() => {
-  document.getElementById("loading").classList.add("hidden");
-  document.getElementById("main").classList.remove("hidden");
-}, 2500);
-</script>
 
 </body>
 </html>
