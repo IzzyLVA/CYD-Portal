@@ -38,3 +38,24 @@ Built to be:
 2. Create a file named: index.html
 3. paste the script of your choice into index.html
 4. Ensure index.html is in root / it will not work if its not
+5. Add SSID then navigate to "Attacks" select evil portal
+
+
+---
+
+## ⚠️ Disclaimer
+
+This project is intended for:
+- Educational use  
+- UI/UX experimentation  
+- Personal projects  
+
+It is **not designed for phishing, credential harvesting, or malicious activity**.
+
+---
+
+## 👤 Author
+
+**IzzyLVA**
+
+> *Pwned by IzzyLVA* 
