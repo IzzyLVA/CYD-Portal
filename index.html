@@ -15,7 +15,7 @@ html, body {
   overflow: hidden;
 }
 
-/* Moving background (CSS only) */
+/* Moving background */
 .bg {
   position: fixed;
   width: 200%;
@@ -31,17 +31,18 @@ html, body {
   to { transform: translate(-50%, -50%); }
 }
 
-/* Center */
+/* Center container */
 .center {
   position: absolute;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  width: 90%;
+  text-align: center;
 }
 
-/* Loading screen */
+/* Loading */
 #loading {
-  text-align: center;
   animation: fadeOut 1s ease forwards;
   animation-delay: 2.5s;
 }
@@ -50,9 +51,9 @@ html, body {
   to { opacity: 0; visibility: hidden; }
 }
 
-/* Typing effect */
+/* Typing */
 .type {
-  font-size: 18px;
+  font-size: 4vw;
   white-space: nowrap;
   overflow: hidden;
   border-right: 2px solid #bb86fc;
@@ -70,7 +71,6 @@ html, body {
 
 /* Main content */
 #main {
-  text-align: center;
   opacity: 0;
   animation: fadeIn 2s ease forwards;
   animation-delay: 2.7s;
@@ -82,7 +82,8 @@ html, body {
 
 /* Glitch text */
 .glitch {
-  font-size: 40px;
+  font-size: 8vw; /* responsive */
+  line-height: 1.2;
   position: relative;
 }
 
@@ -91,6 +92,7 @@ html, body {
   content: attr(data-text);
   position: absolute;
   left: 0;
+  width: 100%;
 }
 
 .glitch::before {
@@ -113,14 +115,27 @@ html, body {
 
 /* Sub text */
 .sub {
-  margin-top: 10px;
-  font-size: 18px;
+  margin-top: 15px;
+  font-size: 4vw;
   color: #8a2be2;
   animation: pulse 2s infinite;
 }
 
 @keyframes pulse {
   50% { opacity: 0.5; }
+}
+
+/* Desktop scaling */
+@media (min-width: 768px) {
+  .glitch {
+    font-size: 40px;
+  }
+  .sub {
+    font-size: 18px;
+  }
+  .type {
+    font-size: 18px;
+  }
 }
 
 </style>
