@@ -1,0 +1,49 @@
+#include <WiFi.h>
+#include <WebServer.h>
+#include <DNSServer.h>
+
+const char* ssid = "Free_WiFi";
+const byte DNS_PORT = 53;
+
+DNSServer dnsServer;
+WebServer server(80);
+
+// Your HTML page
+String htmlPage = R"rawliteral(
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Welcome</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body style="text-align:center; font-family:sans-serif;">
+  <h1>Welcome to My Network</h1>
+  <p>This is a custom message portal 😎</p>
+</body>
+</html>
+)rawliteral";
+
+void handleRoot() {
+  server.send(200, "text/html", htmlPage);
+}
+
+void setup() {
+  Serial.begin(115200);
+
+  WiFi.softAP(ssid);
+  delay(1000);
+
+  // Redirect all DNS requests to ESP IP
+  dnsServer.start(DNS_PORT, "*", WiFi.softAPIP());
+
+  // Web server routes
+  server.on("/", handleRoot);
+  server.onNotFound(handleRoot);
+
+  server.begin();
+}
+
+void loop() {
+  dnsServer.processNextRequest();
+  server.handleClient();
+}
