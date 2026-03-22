@@ -2,54 +2,137 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Portal</title>
+<title>Network Portal</title>
 
 <style>
-  body {
-    margin: 0;
-    overflow: hidden;
-    background: black;
-    font-family: Arial, sans-serif;
-    color: white;
-  }
+body {
+  margin: 0;
+  background: black;
+  overflow: hidden;
+  font-family: monospace;
+  color: #bb86fc;
+}
 
-  canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-  }
+/* Canvas background */
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
 
-  .center-text {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-  }
+/* Scanline effect */
+.scanlines {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.03) 0px,
+    rgba(255,255,255,0.03) 1px,
+    transparent 2px,
+    transparent 4px
+  );
+  pointer-events: none;
+}
 
-  .main {
-    font-size: 40px;
-    font-weight: bold;
-  }
+/* Center content */
+.center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+}
 
-  .sub {
-    font-size: 20px;
-    color: #bb86fc;
-    margin-top: 10px;
-  }
+/* Glitch text */
+.glitch {
+  font-size: 42px;
+  position: relative;
+  animation: glitch 1s infinite;
+}
+
+.glitch::before,
+.glitch::after {
+  content: attr(data-text);
+  position: absolute;
+  left: 0;
+}
+
+.glitch::before {
+  color: #ff00ff;
+  z-index: -1;
+  animation: glitchTop 1s infinite;
+}
+
+.glitch::after {
+  color: #00ffff;
+  z-index: -2;
+  animation: glitchBottom 1s infinite;
+}
+
+@keyframes glitch {
+  0% { transform: translate(0); }
+  20% { transform: translate(-2px, 2px); }
+  40% { transform: translate(-2px, -2px); }
+  60% { transform: translate(2px, 2px); }
+  80% { transform: translate(2px, -2px); }
+  100% { transform: translate(0); }
+}
+
+@keyframes glitchTop {
+  0% { transform: translate(0); }
+  50% { transform: translate(-3px, -3px); }
+  100% { transform: translate(0); }
+}
+
+@keyframes glitchBottom {
+  0% { transform: translate(0); }
+  50% { transform: translate(3px, 3px); }
+  100% { transform: translate(0); }
+}
+
+/* Sub text */
+.sub {
+  margin-top: 15px;
+  font-size: 18px;
+  color: #8a2be2;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.4; }
+  50% { opacity: 1; }
+  100% { opacity: 0.4; }
+}
+
+/* Loading screen */
+#loading {
+  color: #bb86fc;
+  font-size: 20px;
+}
+
+.hidden {
+  display: none;
+}
 </style>
 </head>
 
 <body>
 
 <canvas id="bg"></canvas>
+<div class="scanlines"></div>
 
-<div class="center-text">
-  <div class="main">Welcome to the Void 😈</div>
+<div class="center" id="loading">
+  <div>> establishing connection...</div>
+</div>
+
+<div class="center hidden" id="main">
+  <div class="glitch" data-text="ACCESS GRANTED">ACCESS GRANTED</div>
   <div class="sub">Pwned by Izzy</div>
 </div>
 
 <script>
+// ===== STARFIELD =====
 const canvas = document.getElementById("bg");
 const ctx = canvas.getContext("2d");
 
@@ -58,44 +141,52 @@ canvas.height = window.innerHeight;
 
 let stars = [];
 
-for (let i = 0; i < 120; i++) {
+for (let i = 0; i < 150; i++) {
   stars.push({
     x: Math.random() * canvas.width,
     y: Math.random() * canvas.height,
-    r: Math.random() * 2,
-    d: Math.random() * 1
+    z: Math.random() * canvas.width
   });
 }
 
-function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+function drawStars() {
+  ctx.fillStyle = "black";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  ctx.fillStyle = "#bb86fc"; // purple
-  ctx.beginPath();
+  ctx.fillStyle = "#bb86fc";
 
   for (let i = 0; i < stars.length; i++) {
     let s = stars[i];
-    ctx.moveTo(s.x, s.y);
-    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2, true);
-  }
 
-  ctx.fill();
-  update();
-}
+    let k = 128.0 / s.z;
+    let px = s.x * k + canvas.width / 2;
+    let py = s.y * k + canvas.height / 2;
 
-function update() {
-  for (let i = 0; i < stars.length; i++) {
-    let s = stars[i];
-    s.y += s.d;
+    if (px >= 0 && px <= canvas.width && py >= 0 && py <= canvas.height) {
+      let size = (1 - s.z / canvas.width) * 3;
+      ctx.fillRect(px, py, size, size);
+    }
 
-    if (s.y > canvas.height) {
-      s.y = 0;
-      s.x = Math.random() * canvas.width;
+    s.z -= 2;
+
+    if (s.z <= 0) {
+      s.z = canvas.width;
     }
   }
 }
 
-setInterval(draw, 33);
+function animate() {
+  drawStars();
+  requestAnimationFrame(animate);
+}
+
+animate();
+
+// ===== FAKE LOADING =====
+setTimeout(() => {
+  document.getElementById("loading").classList.add("hidden");
+  document.getElementById("main").classList.remove("hidden");
+}, 2500);
 </script>
 
 </body>
